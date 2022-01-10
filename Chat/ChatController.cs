@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
-using System.Windows.Forms;
+using System.Threading;
 using ExileCore;
-using ExileCore.PoEMemory.MemoryObjects;
 using ExileCore.Shared;
 using ImGuiNET;
+using WindowsInput;
+using WindowsInput.Native;
 
 namespace PoeTradesHelper.Chat
 {
@@ -21,6 +21,7 @@ namespace PoeTradesHelper.Chat
         private readonly Stopwatch _updateSw = Stopwatch.StartNew();
         public event Action<string> MessageReceived = delegate { };
         private readonly Settings _settings;
+
         public ChatController(GameController gameController, Settings settings)
         {
             _gameController = gameController;
@@ -28,6 +29,7 @@ namespace PoeTradesHelper.Chat
             //File.Delete(LOG_PATH);
             ScanChat(true);
         }
+
         public void Update()
         {
             if (_updateSw.ElapsedMilliseconds > _settings.ChatScanDelay.Value)
@@ -36,9 +38,10 @@ namespace PoeTradesHelper.Chat
                 ScanChat(false);
             }
         }
+
         private void ScanChat(bool firstScan)
         {
-            var messageElements = _gameController.Game.IngameState.IngameUi.ChatBox.Children.ToList();
+            var messageElements = _gameController.Game.IngameState.IngameUi.ChatBoxRoot.MessageBox.Children.ToList();
 
             var msgQueue = new Queue<string>();
             for (var i = messageElements.Count - 1; i >= 0; i--)
@@ -51,7 +54,7 @@ namespace PoeTradesHelper.Chat
                 if (!messageElement.IsVisibleLocal)
                     continue;
 
-                var text = NativeStringReader.ReadStringLong(messageElement.Address + 0x2E8, messageElement.M);
+                var text = messageElement.LongText;
                 msgQueue.Enqueue(text);
 
                 //try
@@ -89,13 +92,36 @@ namespace PoeTradesHelper.Chat
             {
                 WinApi.SetForegroundWindow(_gameController.Window.Process.MainWindowHandle);
             }
-            //TODO: Check that chat is opened or no
-            SendKeys.SendWait("{ENTER}");
-            ImGui.SetClipboardText(message);
-            SendKeys.SendWait("^v");
 
-            if(send)
-                SendKeys.SendWait("{ENTER}");
+            var chatBoxRoot = _gameController.Game.IngameState.IngameUi.ChatBoxRoot;
+            var simulator = new InputSimulator();
+            if (!chatBoxRoot.IsVisible)
+            {
+                simulator.Keyboard.KeyPress(VirtualKeyCode.RETURN);
+            }
+
+            var repeats = 20;
+            while (!chatBoxRoot.IsVisible && repeats > 0)
+            {
+                Thread.Sleep(10);
+                repeats--;
+            }
+
+            if (!chatBoxRoot.IsVisible)
+            {
+                DebugWindow.LogError("Failed to open chat");
+                return;
+            }
+
+            var oldClipboardText = ImGui.GetClipboardText();
+            ImGui.SetClipboardText(message);
+            simulator.Keyboard.ModifiedKeyStroke(VirtualKeyCode.CONTROL, VirtualKeyCode.VK_V);
+            Thread.Sleep(50);
+            if (send)
+            {
+                simulator.Keyboard.KeyPress(VirtualKeyCode.RETURN);
+            }
+            ImGui.SetClipboardText(oldClipboardText);
             //WinApi.SetForegroundWindow(Process.GetCurrentProcess().MainWindowHandle);
             //WinApi.SetForegroundWindow(_gameController.Window.Process.MainWindowHandle);
         }
