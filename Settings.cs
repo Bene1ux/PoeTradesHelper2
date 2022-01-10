@@ -1,10 +1,11 @@
-﻿using ExileCore.Shared.Interfaces;
+﻿using System.Windows.Forms;
+using ExileCore.Shared.Attributes;
+using ExileCore.Shared.Interfaces;
 using ExileCore.Shared.Nodes;
 using SharpDX;
 
 namespace PoeTradesHelper
 {
-    using System.Windows.Forms;
 
     public class Settings : ISettings
     {
@@ -26,6 +27,18 @@ namespace PoeTradesHelper
         public ToggleNode PlaySound { get; set; } = new ToggleNode(true);
         public RangeNode<int> ChatScanDelay { get; set; } = new RangeNode<int>(1000, 10, 10000);
         public RangeNode<int> BanMessageTimeMinutes { get; set; } = new RangeNode<int>(20, 1, 100);
+        [Menu("Minimum time between chat messages in milliseconds")]
+        public RangeNode<int> MessageCooldownMilliseconds { get; set; } = new RangeNode<int>(200, 0, 1000);
+        [Menu("Restore Clipboard after sending a message")]
+        public ToggleNode RestoreClipboard { get; set; } = new ToggleNode(true);
+        [Menu("Enable resize of trade window")]
+        public ToggleNode Resizable { get; set; } = new ToggleNode(true);
+        [Menu("Enable move of trade window")]
+        public ToggleNode Movable { get; set; } = new ToggleNode(true);
+        [Menu("Hide if no active trades")]
+        public ToggleNode HideIfNoTradeEntries { get; set; } = new ToggleNode(true);
+        [Menu("Hide ban button")]
+        public ToggleNode HideBanButton { get; set; } = new ToggleNode(true);
         public HotkeyNode TradeCopyToChatHotkey { get; } = new HotkeyNode(Keys.F2);
     }
 }

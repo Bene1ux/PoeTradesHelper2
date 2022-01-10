@@ -97,31 +97,25 @@ namespace PoeTradesHelper.Chat
             var simulator = new InputSimulator();
             if (!chatBoxRoot.IsVisible)
             {
-                simulator.Keyboard.KeyPress(VirtualKeyCode.RETURN);
-            }
-
-            var repeats = 20;
-            while (!chatBoxRoot.IsVisible && repeats > 0)
-            {
-                Thread.Sleep(10);
-                repeats--;
-            }
-
-            if (!chatBoxRoot.IsVisible)
-            {
-                DebugWindow.LogError("Failed to open chat");
-                return;
+                simulator.Keyboard.KeyDown(VirtualKeyCode.RETURN);
+                simulator.Keyboard.KeyUp(VirtualKeyCode.RETURN);
             }
 
             var oldClipboardText = ImGui.GetClipboardText();
             ImGui.SetClipboardText(message);
             simulator.Keyboard.ModifiedKeyStroke(VirtualKeyCode.CONTROL, VirtualKeyCode.VK_V);
-            Thread.Sleep(50);
             if (send)
             {
-                simulator.Keyboard.KeyPress(VirtualKeyCode.RETURN);
+                simulator.Keyboard.KeyDown(VirtualKeyCode.RETURN);
+                simulator.Keyboard.KeyUp(VirtualKeyCode.RETURN);
             }
-            ImGui.SetClipboardText(oldClipboardText);
+
+            Thread.Sleep(_settings.MessageCooldownMilliseconds);
+            if (_settings.RestoreClipboard)
+            {
+                ImGui.SetClipboardText(oldClipboardText);
+            }
+
             //WinApi.SetForegroundWindow(Process.GetCurrentProcess().MainWindowHandle);
             //WinApi.SetForegroundWindow(_gameController.Window.Process.MainWindowHandle);
         }

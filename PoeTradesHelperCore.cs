@@ -20,8 +20,9 @@ namespace PoeTradesHelper
 
     public class PoeTradesHelperCore : BaseSettingsPlugin<Settings>
     {
-        private const float ENTRY_HEIGHT = 75;
-        private const float EntrySpacing = 3;
+        private const float ENTRY_HEIGHT = 65;
+        private const float ENTRY_HEIGHT_MINIMIZED = 25;
+        private const float EntrySpacing = 1;
         private readonly MouseClickController _mouseClickController = new MouseClickController();
         private readonly ReplyButtonsController _replyButtonsController = new ReplyButtonsController();
         private readonly AreaPlayersController _areaPlayersController = new AreaPlayersController();
@@ -183,7 +184,7 @@ namespace PoeTradesHelper
 
         public override void Render()
         {
-            if (_tradeLogic.TradeEntries.Count == 0)
+            if (_tradeLogic.TradeEntries.Count == 0 && Settings.HideIfNoTradeEntries)
                 return;
 
             _mouseClickController.Update();
@@ -198,13 +199,16 @@ namespace PoeTradesHelper
                 windowSize,
                 ImGuiCond.Always);
 
-            var rect = new RectangleF(Settings.PosX, Settings.PosY, windowSize.X, 20);
+            var rect = new RectangleF(Settings.PosX, Settings.PosY, windowSize.X, 60);
 
             var flags = ImGuiWindowFlags.NoScrollbar |
                         ImGuiWindowFlags.NoBackground |
                         ImGuiWindowFlags.NoBringToFrontOnFocus |
                         ImGuiWindowFlags.NoFocusOnAppearing |
                         ImGuiWindowFlags.NoSavedSettings;
+
+            flags = Settings.Resizable ? flags : flags | ImGuiWindowFlags.NoResize;
+            flags = Settings.Movable ? flags : flags | ImGuiWindowFlags.NoMove;
 
             if (!rect.Contains(Input.MousePosition))
                 flags ^= ImGuiWindowFlags.NoMove;
@@ -233,7 +237,8 @@ namespace PoeTradesHelper
 
             foreach (var tradeEntry in _tradeLogic.TradeEntries)
             {
-                var rect = new RectangleF(drawPos.X, drawPos.Y, Settings.EntryWidth, ENTRY_HEIGHT);
+                var height = tradeEntry.Value.Minimize ? ENTRY_HEIGHT_MINIMIZED : ENTRY_HEIGHT;
+                var rect = new RectangleF(drawPos.X, drawPos.Y, Settings.EntryWidth, height);
 
                 var globalRect = rect;
                 const float border = 1;
@@ -248,12 +253,16 @@ namespace PoeTradesHelper
                 headerRect.Height = 25;
                 DrawHeader(tradeEntry.Value, headerRect);
 
-                var contentRect = rect;
-                contentRect.Top += 25;
-                DrawContent(tradeEntry.Value, contentRect);
-
+                if (!tradeEntry.Value.Minimize)
+                {
+                    var contentRect = rect;
+                    contentRect.Top += 25;
+                    DrawContent(tradeEntry.Value, contentRect);
+                }
+               
+                
                 Graphics.DrawFrame(rect, Settings.TradeEntryBorder.Value, 1);
-                drawPos.Y += ENTRY_HEIGHT + EntrySpacing;
+                 drawPos.Y += height + EntrySpacing;
             }
 
             _stashTradeController.Draw(_tradeLogic.TradeEntries.Values);
@@ -264,26 +273,33 @@ namespace PoeTradesHelper
             Graphics.DrawImage(_headerTexture, headerRect);
 
             headerRect.Y += 3;
+            var minimizePos = headerRect.TopLeft.Translate(3);
 
-            if (DrawImageButton(new RectangleF(headerRect.X + 5, headerRect.Y + 1, 18, 18), _whoIsIcon, 2))
+            if (DrawTextButton(ref minimizePos, 18, tradeEntry.Minimize ? ">" : "v", 2,
+                    tradeEntry.Minimize ? new Color(255, 211, 78) : Color.Green))
+            {
+                tradeEntry.Minimize = !tradeEntry.Minimize;
+            }
+
+            if (DrawImageButton(new RectangleF(headerRect.X + 15, headerRect.Y + 1, 18, 18), _whoIsIcon, 2))
             {
                 _chatController.PrintToChat($"/whois {tradeEntry.PlayerNick}");
             }
 
             var inArea = _areaPlayersController.IsPlayerInArea(tradeEntry.PlayerNick);
-            var nickPos = new Vector2(headerRect.X + 5 + 20 + 3, headerRect.Y + 1);
+            var nickPos = new Vector2(headerRect.X + 15 + 20 + 3, headerRect.Y + 1);
 
             var nickShort = tradeEntry.PlayerNick;
 
-            if (nickShort.Length > 18)
+            if (nickShort.Length > 6)
             {
-                nickShort = $"{nickShort.Substring(0, 18)}...";
+                nickShort = $"{nickShort.Substring(0, 6)}...";
             }
 
             if (DrawTextButton(ref nickPos, 18, nickShort, 0, inArea ? Color.Green : new Color(255, 211, 78)))
                 _chatController.PrintToChat($"@{tradeEntry.PlayerNick} ", false);
 
-            var currencyTextPos = headerRect.TopLeft.Translate(headerRect.Width / 2 - 5);
+            var currencyTextPos = headerRect.TopLeft.Translate(135+Graphics.MeasureText(nickShort).X);//headerRect.TopLeft.Translate(headerRect.Width / 2 - 5);
 
             var textSize = Graphics.DrawText($"{tradeEntry.CurrencyAmount} {tradeEntry.CurrencyType}",
                                              currencyTextPos,
@@ -291,12 +307,6 @@ namespace PoeTradesHelper
 
             var rectangleF = new RectangleF(currencyTextPos.X - textSize.X - 5 - 18, currencyTextPos.Y, 18, 18);
             Graphics.DrawImage(tradeEntry.IsIncomingTrade ? _outgoingTradeIcon : _incomeTradeIcon, rectangleF);
-
-            var elapsed = DateTime.Now - tradeEntry.Timestamp;
-
-            Graphics.DrawText(Utils.TimeSpanToString(elapsed),
-                              headerRect.TopLeft.Translate(headerRect.Width / 2 + 5),
-                              Settings.ElapsedTimeColor.Value);
 
             const float button_width = 18;
             const float buttons_spacing = 10;
@@ -345,15 +355,25 @@ namespace PoeTradesHelper
                 if (DrawImageButton(buttonsRect, _inviteIcon))
                     _chatController.PrintToChat($"/invite {tradeEntry.PlayerNick}");
 
-                buttonsRect.X -= button_width + buttons_spacing + 10;
-
-                if (DrawImageButton(buttonsRect, _closeTexture, color: Color.Red))
+                if (!Settings.HideBanButton)
                 {
-                    _tradeLogic.TradeEntries.TryRemove(tradeEntry.UniqueId, out _);
+                    buttonsRect.X -= button_width + buttons_spacing + 10;
 
-                    _bannedMessagesFilter.BanMessage(tradeEntry.Message);
+                    if (DrawImageButton(buttonsRect, _closeTexture, color: Color.Red))
+                    {
+                        _tradeLogic.TradeEntries.TryRemove(tradeEntry.UniqueId, out _);
+
+                        _bannedMessagesFilter.BanMessage(tradeEntry.Message);
+                    }
                 }
+                
             }
+
+            var elapsed = DateTime.Now - tradeEntry.Timestamp;
+
+            Graphics.DrawText(Utils.TimeSpanToString(elapsed),
+                buttonsRect.TopLeft.Translate(-40),
+                Settings.ElapsedTimeColor.Value);
         }
 
         private void DrawContent(TradeEntry tradeEntry, RectangleF contentRect)
@@ -378,7 +398,7 @@ namespace PoeTradesHelper
             {
                 if (DrawImageButton(repeatButtonRect, _askInterestingIcon, 2))
                 {
-                    _chatController.PrintToChat($"@{tradeEntry.PlayerNick} Let me know if you still interesting in {tradeEntry.ItemName} for {tradeEntry.CurrencyAmount} {tradeEntry.CurrencyType}");
+                    _chatController.PrintToChat($"@{tradeEntry.PlayerNick} Hi, are you still interested in my {tradeEntry.ItemName} for {tradeEntry.CurrencyAmount} {tradeEntry.CurrencyType}?");
                 }
             }
             else
@@ -390,7 +410,7 @@ namespace PoeTradesHelper
             }
 
             var buttonsDrawPos = contentRect.TopLeft;
-            buttonsDrawPos.Y += 25;
+            buttonsDrawPos.Y += 19;
             buttonsDrawPos.X += 5;
 
             var buttons = tradeEntry.IsIncomingTrade
@@ -399,14 +419,13 @@ namespace PoeTradesHelper
 
             foreach (var replyButtonInfo in buttons)
             {
-                if (DrawTextButton(ref buttonsDrawPos, 20, replyButtonInfo.ButtonName))
+                if (DrawTextButton(ref buttonsDrawPos, 19, replyButtonInfo.ButtonName))
                 {
                     _chatController.PrintToChat($"@{tradeEntry.PlayerNick} {replyButtonInfo.Message}");
 
                     if (replyButtonInfo.GoToOwnHideout)
                     {
                         _tradeLogic.TradeEntries.TryRemove(tradeEntry.UniqueId, out _);
-
                         _chatController.PrintToChat($"/kick {GameController.Player.GetComponent<Player>().PlayerName}");
                         _chatController.PrintToChat("/hideout");
                     }
@@ -471,13 +490,14 @@ namespace PoeTradesHelper
         {
             var bgColor = Settings.ButtonBorder.Value;
             var contains = rect.Contains(Input.MousePosition);
+            var wasIntended = rect.Contains(_mouseClickController.InitialMousePosition);
 
             if (contains)
                 bgColor = new Color(198, 193, 154);
 
             Graphics.DrawFrame(rect, bgColor, 1);
 
-            if (contains && _mouseClickController.MouseClick)
+            if (contains && _mouseClickController.MouseClick && wasIntended)
                 return true;
 
             return false;

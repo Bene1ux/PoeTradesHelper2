@@ -56,7 +56,7 @@ namespace PoeTradesHelper
 
                     if (items != null)
                     {
-                        var tradeItems = items.Where(x => GetItemName(x.Item) == tradeEntry.ItemName);
+                        var tradeItems = items.Where(x => tradeEntry.ItemName.Contains(GetItemName(x.Item)));
 
                         foreach (var item in tradeItems)
                         {
@@ -142,15 +142,15 @@ namespace PoeTradesHelper
             }
         }
 
-        private string GetItemName(Entity entity)
+        private static string GetItemName(Entity entity)
         {
             var name = string.Empty;
 
-            var mods = entity.GetComponent<Mods>();
-            if (mods != null)
-            {
-                name += $"{mods.UniqueName} ";
-            }
+            // var mods = entity.GetComponent<Mods>();
+            // if (mods != null)
+            // {
+            //     name += $"{mods.UniqueName} ";
+            // }
 
             var baseComp = entity.GetComponent<Base>();
 

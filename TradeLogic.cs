@@ -10,7 +10,8 @@ namespace PoeTradesHelper
     public class TradeLogic
     {
         private static int EntryUniqueIdCounter;
-        private readonly Regex _buyRegex;
+        private readonly Regex _buyRegexEN;
+        private readonly Regex _buyRegexKR; //todo
         private readonly Regex _itemPosRegex;
         private readonly Settings _settings;
         public event Action NewTradeReceived = delegate { };
@@ -18,8 +19,10 @@ namespace PoeTradesHelper
         public TradeLogic(Settings settings)
         {
             _settings = settings;
-            _buyRegex = new Regex(
+            _buyRegexEN = new Regex(
                 @"(I('d like| would like) to buy your|wtb) (?'ItemAmount'[\d.]+\s)?(?'ItemName'.*) (listed for|for my) (?'CurrencyAmount'[\d.]+) (?'CurrencyType'.*) in (?'LeagueName'\w+)?(?'ExtraText'.*)");
+            //_buyRegexKR=new Regex()
+
 
             //\((stash tab|stash) \"(?'TabName'.*)\"\;(\sposition\:|) left (?'TabX'\d+)\, top (?'TabY'\d+)\)(?'Offer'.+|)
             _itemPosRegex =
@@ -34,7 +37,7 @@ namespace PoeTradesHelper
         {
             if (message.MessageType == MessageType.From || message.MessageType == MessageType.To)
             {
-                var match = _buyRegex.Match(message.Message);
+                var match = _buyRegexEN.Match(message.Message);
 
                 if (match.Success)
                     TradeMessageReceived(message, match);
@@ -127,6 +130,7 @@ namespace PoeTradesHelper
         public int UniqueId { get; }
         public string Message { get; }
         public string OfferText { get; set; } = string.Empty;
+        public bool Minimize { get; set; } = false;
     }
 
     public class ItemPosInfo
