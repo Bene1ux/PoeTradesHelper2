@@ -102,7 +102,7 @@ namespace PoeTradesHelper.Chat
             }
 
             var oldClipboardText = ImGui.GetClipboardText();
-            if (string.IsNullOrEmpty(message))
+            if (!string.IsNullOrEmpty(message))
             {
                 ImGui.SetClipboardText(message);
             }
