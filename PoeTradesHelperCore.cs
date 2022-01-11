@@ -2,6 +2,7 @@
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using ExileCore;
 using ExileCore.PoEMemory.Components;
 using ExileCore.Shared.AtlasHelper;
@@ -52,6 +53,9 @@ namespace PoeTradesHelper
 
         public override bool Initialise()
         {
+            Input.RegisterKey(Keys.Control);
+            Input.RegisterKey(Keys.Enter);
+            Input.RegisterKey(Keys.V);
             _chatController = new ChatController(GameController, Settings);
             _messagesController = new MessagesController();
             _tradeLogic = new TradeLogic(Settings);
