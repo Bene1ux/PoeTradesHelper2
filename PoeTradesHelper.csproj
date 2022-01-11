@@ -91,7 +91,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Sounds\notification.wav">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="textures\TradeButtonsAtlas.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
