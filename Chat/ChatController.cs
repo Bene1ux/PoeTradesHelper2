@@ -102,7 +102,10 @@ namespace PoeTradesHelper.Chat
             }
 
             var oldClipboardText = ImGui.GetClipboardText();
-            ImGui.SetClipboardText(message);
+            if (string.IsNullOrEmpty(message))
+            {
+                ImGui.SetClipboardText(message);
+            }
             simulator.Keyboard.ModifiedKeyStroke(VirtualKeyCode.CONTROL, VirtualKeyCode.VK_V);
             if (send)
             {
