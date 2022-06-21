@@ -32,6 +32,36 @@ namespace PoeTradesHelper
             //UpdateStashTradeItems();
         }
 
+        public void HighlightCell(int x, int y, bool isQuad)
+        {
+            var stashElement = _gameController.Game.IngameState.IngameUi.StashElement;
+
+            if (!stashElement.IsVisible)
+                return;
+
+            var visibleStash = stashElement.VisibleStash;
+            if (visibleStash != null)
+            {
+                var items = stashElement.VisibleStash?.VisibleInventoryItems;
+                if (items != null)
+                {
+                    isQuad = isQuad || items.Any(i => i.InventPosX > 12 || i.InventPosY > 12);
+                }
+
+                var cellCount = isQuad ? 24 : 12;
+                var visibleStashRect = visibleStash.GetClientRectCache;
+                var cellSize = visibleStashRect.Width / cellCount;
+
+                var itemRect = new RectangleF(
+                    visibleStashRect.X + (x - 1) * cellSize,
+                    visibleStashRect.Y + (y - 1) * cellSize,
+                    cellSize,
+                    cellSize);
+
+                _graphics.DrawFrame(itemRect, Color.Azure, 3);
+            }
+        }
+        
         private void HighlightTradeItems(ICollection<TradeEntry> entries)
         {
             var stashElement = _gameController.Game.IngameState.IngameUi.StashElement;
@@ -89,7 +119,14 @@ namespace PoeTradesHelper
                 }
                 else if(visibleStash != null)
                 {
-                    var cellCount = visibleStash.InvType == InventoryType.QuadStash ? 24 : 12;
+                    var items = stashElement.VisibleStash?.VisibleInventoryItems;
+                    var isQuad = false;
+                    if (items != null)
+                    {
+                        isQuad = items.Any(i => i.InventPosX > 12 || i.InventPosY > 12);
+                    }
+
+                    var cellCount = isQuad ? 24 : visibleStash.InvType == InventoryType.QuadStash ? 24 : 12;
                     var visibleStashRect = visibleStash.GetClientRectCache;
                     var cellSize = visibleStashRect.Width / cellCount;
 

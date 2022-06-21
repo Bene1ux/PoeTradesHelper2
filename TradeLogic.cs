@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Text.RegularExpressions;
@@ -11,7 +12,7 @@ namespace PoeTradesHelper
     {
         private static int EntryUniqueIdCounter;
         private readonly Regex _buyRegexEN;
-        private readonly Regex _buyRegexKR; //todo
+        private readonly List<Regex> _buyRegexOther;
         private readonly Regex _itemPosRegex;
         private readonly Settings _settings;
         public event Action NewTradeReceived = delegate { };
@@ -20,8 +21,18 @@ namespace PoeTradesHelper
         {
             _settings = settings;
             _buyRegexEN = new Regex(
-                @"(I('d like| would like) to buy your|wtb) (?'ItemAmount'[\d.]+\s)?(?'ItemName'.*) (listed for|for my) (?'CurrencyAmount'[\d.]+) (?'CurrencyType'.*) in (?'LeagueName'\w+)?(?'ExtraText'.*)");
-            //_buyRegexKR=new Regex()
+                @"(I('d like| would like) to buy your|wtb) (?'ItemAmount'[\d.]+\s)?(?'ItemName'.*?) ((listed for|for my) (?'CurrencyAmount'[\d.]+) (?'CurrencyType'.*) )?in (?'LeagueName'\w+)?(?'ExtraText'.*)", RegexOptions.Compiled);
+            _buyRegexOther = new List<Regex>()
+            {
+                new Regex(@"안녕하세요,", RegexOptions.Compiled),
+                new Regex(@"Здравствуйте", RegexOptions.Compiled),
+                new Regex(@"Olá, eu gostaria", RegexOptions.Compiled),
+                new Regex(@"สวัสดี เราต้องการชื้อ", RegexOptions.Compiled),
+                new Regex(@"Hi, ich möchte"),
+                new Regex(@"Bonjour, je souhaiterais", RegexOptions.Compiled),
+                new Regex(@"Hola, quisiera", RegexOptions.Compiled),
+                new Regex(@"やあ、", RegexOptions.Compiled),
+            };
 
 
             //\((stash tab|stash) \"(?'TabName'.*)\"\;(\sposition\:|) left (?'TabX'\d+)\, top (?'TabY'\d+)\)(?'Offer'.+|)
@@ -37,10 +48,25 @@ namespace PoeTradesHelper
         {
             if (message.MessageType == MessageType.From || message.MessageType == MessageType.To)
             {
-                var match = _buyRegexEN.Match(message.Message);
+                var matchEN = _buyRegexEN.Match(message.Message);
 
-                if (match.Success)
-                    TradeMessageReceived(message, match);
+                if (matchEN.Success)
+                {
+                    TradeMessageReceivedEN(message, matchEN);
+                    return;
+                }
+
+                foreach (var buyRegex in _buyRegexOther)
+                {
+                    var match = buyRegex.Match(message.Message);
+                    if (!match.Success)
+                    {
+                        continue;
+                    }
+                    TradeMessageReceivedOther(message, match);
+                    return;
+                }
+
             }
             else if (message.MessageType == MessageType.NotOnline)
             {
@@ -53,7 +79,7 @@ namespace PoeTradesHelper
             }
         }
 
-        private void TradeMessageReceived(ChatMessage message, Match match)
+        private void TradeMessageReceivedEN(ChatMessage message, Match match)
         {
             if (_settings.RemoveDuplicatedTrades.Value && TradeEntries.Any(x =>
                 x.Value.PlayerNick == message.Nick && x.Value.Message == message.Message))
@@ -96,6 +122,31 @@ namespace PoeTradesHelper
                     tradeEntry.OfferText = extraText.Value;
                 }
             }
+
+            TradeEntries.TryAdd(EntryUniqueIdCounter, tradeEntry);
+            NewTradeReceived();
+        }
+
+        private void TradeMessageReceivedOther(ChatMessage message, Match match)
+        {
+            if (_settings.RemoveDuplicatedTrades.Value && TradeEntries.Any(x =>
+                    x.Value.PlayerNick == message.Nick && x.Value.Message == message.Message))
+                return;
+
+            EntryUniqueIdCounter++;
+
+            var tradeEntry = new TradeEntry(
+                "-",
+                "-",
+                message.Nick,
+                "-",
+                "-",
+                message.MessageType == MessageType.From,
+                EntryUniqueIdCounter,
+                message.Message);
+
+            //var leagueName = match.Groups["LeagueName"].Value;//TODO: Check and warn if wrong league
+            var extraText = match.Groups["ExtraText"];
 
             TradeEntries.TryAdd(EntryUniqueIdCounter, tradeEntry);
             NewTradeReceived();

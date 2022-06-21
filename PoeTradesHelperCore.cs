@@ -86,7 +86,7 @@ namespace PoeTradesHelper
             _tradeLogic.NewTradeReceived += OnNewTradeReceived;
 
             _cancellationTokenSource = new CancellationTokenSource();
-
+            DebugWindow.LogMsg("****NEW CANCELLATION****");
             var factory = new TaskFactory(_cancellationTokenSource.Token,
                                           TaskCreationOptions.LongRunning,
                                           TaskContinuationOptions.None,
@@ -101,6 +101,7 @@ namespace PoeTradesHelper
         public override void OnUnload()
         {
             base.OnUnload();
+            DebugWindow.LogMsg("****CANCELLATION ON UNLOAD****");
             _cancellationTokenSource.Cancel();
         }
 
@@ -176,18 +177,25 @@ namespace PoeTradesHelper
 
         public override void OnPluginDestroyForHotReload()
         {
+            DebugWindow.LogMsg("****CANCELLATION ON DESTROY****");
             _cancellationTokenSource.Cancel();
             base.OnPluginDestroyForHotReload();
         }
 
         public override void OnClose()
         {
+            DebugWindow.LogMsg("****CANCELLATION ON CLOSE****");
             _cancellationTokenSource.Cancel();
             base.OnClose();
         }
 
         public override void Render()
         {
+            if (Settings.HighlightCell)
+            {
+                _stashTradeController.HighlightCell(Settings.HighlightX,Settings.HighlightY,Settings.IsQuad);
+            }
+
             if (_tradeLogic.TradeEntries.Count == 0 && Settings.HideIfNoTradeEntries)
                 return;
 
@@ -402,7 +410,14 @@ namespace PoeTradesHelper
             {
                 if (DrawImageButton(repeatButtonRect, _askInterestingIcon, 2))
                 {
-                    _chatController.PrintToChat($"@{tradeEntry.PlayerNick} Hi, are you still interested in my {tradeEntry.ItemName} for {tradeEntry.CurrencyAmount} {tradeEntry.CurrencyType}?");
+                    if (string.IsNullOrEmpty(tradeEntry.CurrencyType))
+                    {
+                        _chatController.PrintToChat($"@{tradeEntry.PlayerNick} Hi, are you still interested in my {tradeEntry.ItemName}?");
+                    }
+                    else
+                    {
+                        _chatController.PrintToChat($"@{tradeEntry.PlayerNick} Hi, are you still interested in my {tradeEntry.ItemName} for {tradeEntry.CurrencyAmount} {tradeEntry.CurrencyType}?");
+                    }
                 }
             }
             else

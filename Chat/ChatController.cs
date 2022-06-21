@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
+using System.Windows.Forms;
 using ExileCore;
 using ExileCore.Shared;
 using ImGuiNET;
@@ -21,13 +22,14 @@ namespace PoeTradesHelper.Chat
         private readonly Stopwatch _updateSw = Stopwatch.StartNew();
         public event Action<string> MessageReceived = delegate { };
         private readonly Settings _settings;
+        private bool firstScan = true;
 
         public ChatController(GameController gameController, Settings settings)
         {
             _gameController = gameController;
             _settings = settings;
             //File.Delete(LOG_PATH);
-            ScanChat(true);
+            ScanChat();
         }
 
         public void Update()
@@ -35,13 +37,17 @@ namespace PoeTradesHelper.Chat
             if (_updateSw.ElapsedMilliseconds > _settings.ChatScanDelay.Value)
             {
                 _updateSw.Restart();
-                ScanChat(false);
+                ScanChat();
             }
         }
 
-        private void ScanChat(bool firstScan)
+        private void ScanChat()
         {
-            var messageElements = _gameController.Game.IngameState.IngameUi.ChatBoxRoot.MessageBox.Children.ToList();
+            var messageElements = _gameController?.Game?.IngameState?.IngameUi?.ChatBoxRoot?.MessageBox?.Children?.ToList();
+            if (messageElements == null)
+            {
+                return;
+            }
 
             var msgQueue = new Queue<string>();
             for (var i = messageElements.Count - 1; i >= 0; i--)
@@ -71,10 +77,14 @@ namespace PoeTradesHelper.Chat
             _lastMessageAddress = messageElements.LastOrDefault()?.Address ?? 0;
 
             if (firstScan)
+            {
+                firstScan = false;
                 return;
+            }
 
             while (msgQueue.Count > 0)
             {
+                DebugWindow.LogDebug($"Msg received: {msgQueue.Peek()}");
                 try
                 {
                     MessageReceived(msgQueue.Dequeue());
@@ -101,7 +111,7 @@ namespace PoeTradesHelper.Chat
                 simulator.Keyboard.KeyUp(VirtualKeyCode.RETURN);
             }
 
-            var oldClipboardText = ImGui.GetClipboardText();
+            var oldClipboardText = Clipboard.GetText();//ImGui.GetClipboardText();
             if (!string.IsNullOrEmpty(message))
             {
                 ImGui.SetClipboardText(message);
