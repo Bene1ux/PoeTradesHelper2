@@ -27,7 +27,7 @@ namespace PoeTradesHelper
                 new Regex(@"안녕하세요,", RegexOptions.Compiled),
                 new Regex(@"Здравствуйте", RegexOptions.Compiled),
                 new Regex(@"Olá, eu gostaria", RegexOptions.Compiled),
-                new Regex(@"สวัสดี เราต้องการชื้อ", RegexOptions.Compiled),
+                new Regex(@"สวัสดี", RegexOptions.Compiled),
                 new Regex(@"Hi, ich möchte"),
                 new Regex(@"Bonjour, je souhaiterais", RegexOptions.Compiled),
                 new Regex(@"Hola, quisiera", RegexOptions.Compiled),
@@ -158,8 +158,9 @@ namespace PoeTradesHelper
         public TradeEntry(string itemAmount, string itemName, string playerNick, string currencyType, string currencyAmount,
             bool incomingTrade, int uniqueId, string message)
         {
+            var iconText = "{{icon}}";
             ItemAmount = itemAmount;
-            ItemName = itemName;
+            ItemName = itemName.Replace(iconText, string.Empty);
             PlayerNick = playerNick;
             CurrencyType = currencyType;
             CurrencyAmount = currencyAmount;

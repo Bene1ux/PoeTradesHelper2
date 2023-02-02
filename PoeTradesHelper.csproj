@@ -31,6 +31,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="ExileCore">
+      <HintPath>..\..\..\..\PoEHelper-3.20.0-2\ExileCore.dll</HintPath>
+    </Reference>
     <Reference Include="ImGui.NET">
       <HintPath>..\..\..\deps\ImGui.NET.dll</HintPath>
       <Private>False</Private>
@@ -81,13 +84,6 @@
     <Compile Include="StashTradeController.cs" />
     <Compile Include="TradeLogic.cs" />
     <Compile Include="Utils.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\..\Core\Core.csproj">
-      <Project>{5539d732-34a7-44ab-9e28-116c3429b12a}</Project>
-      <Name>Core</Name>
-      <Private>False</Private>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Content Include="Sounds\notification.wav">

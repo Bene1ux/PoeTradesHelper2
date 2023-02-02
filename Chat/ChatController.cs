@@ -5,6 +5,8 @@ using System.Linq;
 using System.Threading;
 using System.Windows.Forms;
 using ExileCore;
+using ExileCore.PoEMemory.Elements;
+using ExileCore.PoEMemory.MemoryObjects;
 using ExileCore.Shared;
 using ImGuiNET;
 using WindowsInput;
@@ -18,7 +20,7 @@ namespace PoeTradesHelper.Chat
         //    @"C:\HomeProjects\Games\_PoE\HUD\PoEHelper\Plugins\Compiled\PoeTradesHelper\chatLog.txt";
 
         private readonly GameController _gameController;
-        private long _lastMessageAddress;
+        private string _lastMessageAddress;
         private readonly Stopwatch _updateSw = Stopwatch.StartNew();
         public event Action<string> MessageReceived = delegate { };
         private readonly Settings _settings;
@@ -43,7 +45,14 @@ namespace PoeTradesHelper.Chat
 
         private void ScanChat()
         {
-            var messageElements = _gameController?.Game?.IngameState?.IngameUi?.ChatBoxRoot?.MessageBox?.Children?.ToList();
+            //var messageElements = _gameController?.Game?.IngameState?.IngameUi?.ChatBoxRoot?.MessageBox?.Children?.ToList();
+            
+            //var msgs = _gameController?.Game?.IngameState?.IngameUi?.ChatPanel?.Children[1]?.Children[2]?.Children[1]?.Children;
+            //if(msgs is null)
+            //{
+            //    DebugWindow.LogMsg("No chat msg thingy");
+            //}
+            var messageElements = _gameController?.Game?.IngameState?.IngameUi?.ChatMessages?.ToList();
             if (messageElements == null)
             {
                 return;
@@ -54,14 +63,11 @@ namespace PoeTradesHelper.Chat
             {
                 var messageElement = messageElements[i];
 
-                if (messageElement.Address == _lastMessageAddress)
+                if (messageElement.Equals(_lastMessageAddress))
                     break;
 
-                if (!messageElement.IsVisibleLocal)
-                    continue;
-
-                var text = messageElement.LongText;
-                msgQueue.Enqueue(text);
+                //var text = NativeStringReader.ReadStringLong(messageElement.Address + 0x378, messageElement.M);
+                msgQueue.Enqueue(messageElement);
 
                 //try
                 //{
@@ -74,7 +80,7 @@ namespace PoeTradesHelper.Chat
             }
 
 
-            _lastMessageAddress = messageElements.LastOrDefault()?.Address ?? 0;
+            _lastMessageAddress = messageElements.LastOrDefault();
 
             if (firstScan)
             {
@@ -84,7 +90,7 @@ namespace PoeTradesHelper.Chat
 
             while (msgQueue.Count > 0)
             {
-                DebugWindow.LogDebug($"Msg received: {msgQueue.Peek()}");
+                DebugWindow.LogMsg($"Msg received: {msgQueue.Peek()}");
                 try
                 {
                     MessageReceived(msgQueue.Dequeue());
@@ -103,7 +109,7 @@ namespace PoeTradesHelper.Chat
                 WinApi.SetForegroundWindow(_gameController.Window.Process.MainWindowHandle);
             }
 
-            var chatBoxRoot = _gameController.Game.IngameState.IngameUi.ChatBoxRoot;
+            var chatBoxRoot = _gameController.Game.IngameState.IngameUi.ChatBox;
             var simulator = new InputSimulator();
             if (!chatBoxRoot.IsVisible)
             {
