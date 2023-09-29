@@ -1,0 +1,23 @@
+// Fast response buttons
+// Format:
+// button name|message
+// or
+// button name|message|X
+//
+// X mean leave party (or kick from own party, after trade) and close the trade element
+// C mean just close the trade element
+// H mean leave and go to hideout
+
+
+OutgoingReplies:
+thanks_tp|thanks|H
+thanks|thanks|X
+
+IncomingReplies:
+1m|one moment please
+thanks|thanks|X
+no thx|no, thanks|C
+sold|sold|C
+3min|3 minutes please
+5min|5 minutes please
+busy|busy, cannot trade|C
