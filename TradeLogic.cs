@@ -12,6 +12,7 @@ namespace PoeTradesHelper
     {
         private static int EntryUniqueIdCounter;
         private readonly Regex _buyRegexEN;
+        private readonly Regex _buyRegexCompass;
         private readonly List<Regex> _buyRegexOther;
         private readonly Regex _itemPosRegex;
         private readonly Settings _settings;
@@ -22,6 +23,7 @@ namespace PoeTradesHelper
             _settings = settings;
             _buyRegexEN = new Regex(
                 @"(I('d like| would like) to buy your|wtb) (?'ItemAmount'[\d.]+\s)?(?'ItemName'.*?) ((listed for|for my) (?'CurrencyAmount'[\d.]+) (?'CurrencyType'.*) )?in (?'LeagueName'\w+)?(?'ExtraText'.*)", RegexOptions.Compiled);
+            _buyRegexCompass = new Regex(@"WTB (?'ItemAmount'[\d.]*)\s(?'ItemName'.*?) (?>[\d.]+\.?[\d.]*)\w+ each\. Total (?'CurrencyAmount'\S+(?> \(.*\))?)?(?'ExtraText'.*)", RegexOptions.Compiled);
             _buyRegexOther = new List<Regex>()
             {
                 new Regex(@"안녕하세요,", RegexOptions.Compiled),
@@ -56,6 +58,13 @@ namespace PoeTradesHelper
                     return;
                 }
 
+                var matchCompass = _buyRegexCompass.Match(message.Message);
+                if (matchCompass.Success)
+                {
+                    TradeMessageReceivedCompass(message, matchCompass);
+                    return;
+                }
+
                 foreach (var buyRegex in _buyRegexOther)
                 {
                     var match = buyRegex.Match(message.Message);
@@ -77,6 +86,40 @@ namespace PoeTradesHelper
                     TradeEntries.TryRemove(entryToRemove.UniqueId, out _);
                 }
             }
+        }
+
+        private void TradeMessageReceivedCompass(ChatMessage message, Match match)
+        {
+            if (_settings.RemoveDuplicatedTrades.Value && TradeEntries.Any(x =>
+               x.Value.PlayerNick == message.Nick && x.Value.Message == message.Message))
+                return;
+
+            var itemAmount = match.Groups["ItemAmount"].Value;
+            var itemName = match.Groups["ItemName"].Value;
+            var currencyType = string.Empty;
+            var currencyAmount = match.Groups["CurrencyAmount"].Value;
+            EntryUniqueIdCounter++;
+
+            var tradeEntry = new TradeEntry(
+                itemAmount,
+                itemName,
+                message.Nick,
+                currencyType,
+                currencyAmount,
+                message.MessageType == MessageType.From,
+                EntryUniqueIdCounter,
+                message.Message);
+
+            //var leagueName = match.Groups["LeagueName"].Value;//TODO: Check and warn if wrong league
+            var extraText = match.Groups["ExtraText"];
+
+            if (extraText.Success)
+            {
+                tradeEntry.OfferText = extraText.Value;
+            }
+
+            TradeEntries.TryAdd(EntryUniqueIdCounter, tradeEntry);
+            NewTradeReceived();
         }
 
         private void TradeMessageReceivedEN(ChatMessage message, Match match)

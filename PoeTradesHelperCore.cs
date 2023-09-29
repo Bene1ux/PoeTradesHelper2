@@ -311,13 +311,13 @@ namespace PoeTradesHelper
             if (DrawTextButton(ref nickPos, 18, nickShort, 0, inArea ? Color.Green : new Color(255, 211, 78)))
                 _chatController.PrintToChat($"@{tradeEntry.PlayerNick} ", false);
 
-            var currencyTextPos = headerRect.TopLeft.Translate(135+Graphics.MeasureText(nickShort).X);//headerRect.TopLeft.Translate(headerRect.Width / 2 - 5);
+            var currencyTextPos = nickPos.Translate(19);//headerRect.TopLeft.Translate(135+Graphics.MeasureText(nickShort).X);//headerRect.TopLeft.Translate(headerRect.Width / 2 - 5);
 
             var textSize = Graphics.DrawText($"{tradeEntry.CurrencyAmount} {tradeEntry.CurrencyType}",
                                              currencyTextPos,
-                                             Settings.CurrencyColor.Value, FontAlign.Right);
+                                             Settings.CurrencyColor.Value, FontAlign.Left);
 
-            var rectangleF = new RectangleF(currencyTextPos.X - textSize.X - 5 - 18, currencyTextPos.Y, 18, 18);
+            var rectangleF = new RectangleF(nickPos.X-2, currencyTextPos.Y, 18, 18);
             Graphics.DrawImage(tradeEntry.IsIncomingTrade ? _outgoingTradeIcon : _incomeTradeIcon, rectangleF);
 
             const float button_width = 18;
