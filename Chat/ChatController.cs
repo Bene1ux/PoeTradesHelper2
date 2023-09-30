@@ -109,7 +109,7 @@ namespace PoeTradesHelper.Chat
                 WinApi.SetForegroundWindow(_gameController.Window.Process.MainWindowHandle);
             }
 
-            var chatBoxRoot = _gameController.Game.IngameState.IngameUi.ChatBox;
+            var chatBoxRoot = _gameController.Game.IngameState.IngameUi.ChatTitlePanel;
             var simulator = new InputSimulator();
             if (!chatBoxRoot.IsVisible)
             {
