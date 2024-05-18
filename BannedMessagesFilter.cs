@@ -20,25 +20,25 @@
 
         public void FilterMessage(ChatMessage chatMessage)
         {
-            _bannedMessages.RemoveAll(x => x.IsOutOfTime(_settings.BanMessageTimeMinutes.Value));
+            //_bannedMessages.RemoveAll(x => x.IsOutOfTime(_settings.BanMessageTimeMinutes.Value));
 
-            foreach (var bannedMessage in _bannedMessages)
-            {
-                if (bannedMessage.Message == chatMessage.Message)
-                {
-                    return;
-                }
-            }
+            //foreach (var bannedMessage in _bannedMessages)
+            //{
+            //    if (bannedMessage.Message == chatMessage.Message)
+            //    {
+            //        return;
+            //    }
+            //}
 
             MessagePassed(chatMessage);
         }
 
-        public void BanMessage(string message)
-        {
-            if (_bannedMessages.Any(x => x.Message == message))
-                return;
-            _bannedMessages.Add(new BannedMessage(message));
-        }
+        //public void BanMessage(string message)
+        //{
+        //    if (_bannedMessages.Any(x => x.Message == message))
+        //        return;
+        //    _bannedMessages.Add(new BannedMessage(message));
+        //}
 
         private class BannedMessage
         {

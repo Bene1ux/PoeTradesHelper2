@@ -21,12 +21,12 @@ namespace PoeTradesHelper
         //public ColorNode NickColor { get; set; } = new ColorNode(new Color(255, 211, 78));
         public ColorNode ElapsedTimeColor { get; set; } = new ColorNode(new Color(255, 211, 78));
         public ColorNode CurrencyColor { get; set; } = new ColorNode(new Color(255, 250, 250));
-        public ColorNode ButtonBg { get; set; } = new ColorNode(new Color(70, 80, 79));
+        //public ColorNode ButtonBg { get; set; } = new ColorNode(new Color(70, 80, 79));
         public ColorNode ButtonBorder { get; set; } = new ColorNode(new Color(96, 106, 105));
         public ToggleNode RemoveDuplicatedTrades { get; set; } = new ToggleNode(true);
         public ToggleNode PlaySound { get; set; } = new ToggleNode(true);
         public RangeNode<int> ChatScanDelay { get; set; } = new RangeNode<int>(1000, 10, 10000);
-        public RangeNode<int> BanMessageTimeMinutes { get; set; } = new RangeNode<int>(20, 1, 100);
+        //public RangeNode<int> BanMessageTimeMinutes { get; set; } = new RangeNode<int>(20, 1, 100);
         [Menu("Minimum time between chat messages in milliseconds")]
         public RangeNode<int> MessageCooldownMilliseconds { get; set; } = new RangeNode<int>(200, 0, 1000);
         [Menu("Restore Clipboard after sending a message")]
@@ -37,13 +37,13 @@ namespace PoeTradesHelper
         public ToggleNode Movable { get; set; } = new ToggleNode(true);
         [Menu("Hide if no active trades")]
         public ToggleNode HideIfNoTradeEntries { get; set; } = new ToggleNode(true);
-        [Menu("Hide ban button")]
-        public ToggleNode HideBanButton { get; set; } = new ToggleNode(true);
+        //[Menu("Hide ban button")]
+        //public ToggleNode HideBanButton { get; set; } = new ToggleNode(true);
         public ToggleNode HighlightCell { get; set; } = new ToggleNode(true);
         public RangeNode<int> HighlightX { get; set; } = new RangeNode<int>(1, 1, 24);
         public RangeNode<int> HighlightY { get; set; } = new RangeNode<int>(1, 1, 24);
         public ToggleNode IsQuad { get; set; } = new ToggleNode(true);
-        public HotkeyNode TradeCopyToChatHotkey { get; } = new HotkeyNode(Keys.F2);
+        public ToggleNode Debug { get; set; } = new ToggleNode(false);
         
     }
 }

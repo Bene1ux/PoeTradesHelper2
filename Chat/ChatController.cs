@@ -38,6 +38,10 @@ namespace PoeTradesHelper.Chat
         {
             if (_updateSw.ElapsedMilliseconds > _settings.ChatScanDelay.Value)
             {
+                if (_settings.Debug)
+                {
+                    DebugWindow.LogMsg($"[PoeTradesHelper] Scanning chat");
+                }
                 _updateSw.Restart();
                 ScanChat();
             }
@@ -46,22 +50,31 @@ namespace PoeTradesHelper.Chat
         private void ScanChat()
         {
             //var messageElements = _gameController?.Game?.IngameState?.IngameUi?.ChatBoxRoot?.MessageBox?.Children?.ToList();
-            
+
             //var msgs = _gameController?.Game?.IngameState?.IngameUi?.ChatPanel?.Children[1]?.Children[2]?.Children[1]?.Children;
             //if(msgs is null)
             //{
             //    DebugWindow.LogMsg("No chat msg thingy");
             //}
-            var messageElements = _gameController?.Game?.IngameState?.IngameUi?.ChatMessages?.ToList();
+
+            //var messageElements = _gameController?.Game?.IngameState?.IngameUi?.ChatMessages?.ToList();
+            var messageElements = _gameController?.Game?.IngameState?.IngameUi?.ChatPanel?.Children[1]?.Children[2]?.Children[1]?.Children.ToList();
+
             if (messageElements == null)
             {
                 return;
             }
 
+            if (_settings.Debug)
+            {
+                DebugWindow.LogMsg($"[PoeTradesHelper] Messages: {messageElements.Count}, last msg scanned: {_lastMessageAddress}");
+            }
+
             var msgQueue = new Queue<string>();
             for (var i = messageElements.Count - 1; i >= 0; i--)
             {
-                var messageElement = messageElements[i];
+                //var messageElement = messageElements[i];
+                var messageElement = messageElements[i].Text;
 
                 if (messageElement.Equals(_lastMessageAddress))
                     break;
@@ -78,9 +91,13 @@ namespace PoeTradesHelper.Chat
                 //    //ignored
                 //}
             }
+            if (_settings.Debug)
+            {
+                DebugWindow.LogMsg($"[PoeTradesHelper] New Messages: {msgQueue.Count}");
+            }
 
-
-            _lastMessageAddress = messageElements.LastOrDefault();
+            //_lastMessageAddress = messageElements.LastOrDefault();
+            _lastMessageAddress = messageElements.LastOrDefault()?.Text;
 
             if (firstScan)
             {
@@ -90,14 +107,18 @@ namespace PoeTradesHelper.Chat
 
             while (msgQueue.Count > 0)
             {
-                DebugWindow.LogMsg($"Msg received: {msgQueue.Peek()}");
+                if (_settings.Debug)
+                {
+                    DebugWindow.LogMsg($"[PoeTradesHelperCore] Msg received: {msgQueue.Peek()}");
+                }
+                
                 try
                 {
                     MessageReceived(msgQueue.Dequeue());
                 }
                 catch (Exception e)
                 {
-                    DebugWindow.LogError($"Error processing chat message. Error: {e.Message}", 5);
+                    DebugWindow.LogError($"[PoeTradesHelperCore] Error processing chat message. Error: {e.Message}", 5);
                 }
             }
         }

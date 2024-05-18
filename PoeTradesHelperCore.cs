@@ -86,7 +86,11 @@ namespace PoeTradesHelper
             _tradeLogic.NewTradeReceived += OnNewTradeReceived;
 
             _cancellationTokenSource = new CancellationTokenSource();
-            DebugWindow.LogMsg("****NEW CANCELLATION****");
+            if (Settings.Debug)
+            {
+                DebugWindow.LogMsg("[PoeTradesHelperCore] NEW CANCELLATION");
+            }
+                
             var factory = new TaskFactory(_cancellationTokenSource.Token,
                                           TaskCreationOptions.LongRunning,
                                           TaskContinuationOptions.None,
@@ -101,7 +105,11 @@ namespace PoeTradesHelper
         public override void OnUnload()
         {
             base.OnUnload();
-            DebugWindow.LogMsg("****CANCELLATION ON UNLOAD****");
+            if (Settings.Debug)
+            {
+                DebugWindow.LogMsg("[PoeTradesHelperCore] CANCELLATION ON UNLOAD");
+            }
+            
             _cancellationTokenSource.Cancel();
         }
 
@@ -114,10 +122,11 @@ namespace PoeTradesHelper
                 return;
 
             var player = entity.GetComponent<Player>();
+            var playerName = player?.PlayerName;
 
-            if (string.IsNullOrEmpty(player.PlayerName))
+            if (string.IsNullOrEmpty(playerName))
                 return;
-            _areaPlayersController.RegisterPlayerInArea(player.PlayerName);
+            _areaPlayersController.RegisterPlayerInArea(playerName);
         }
 
         public override void EntityRemoved(Entity entity)
@@ -129,10 +138,11 @@ namespace PoeTradesHelper
                 return;
 
             var player = entity.GetComponent<Player>();
+            var playerName = player?.PlayerName;
 
-            if (string.IsNullOrEmpty(player.PlayerName))
+            if (string.IsNullOrEmpty(playerName))
                 return;
-            _areaPlayersController.UnregisterPlayerInArea(player.PlayerName);
+            _areaPlayersController.UnregisterPlayerInArea(playerName);
         }
 
         #endregion
@@ -149,42 +159,28 @@ namespace PoeTradesHelper
             {
                 _chatController.Update();
                 Task.Delay(100).Wait();
-
-
-                //The same functionality as in mercury trade. Press F2, press whisper button on trade site (copy to buffer), unpress F2- it will be printed to chat
-                var keyState = Input.GetKeyState(Settings.TradeCopyToChatHotkey.Value);
-                if (keyState && !_clipboardTradeProcessorProcessPressed)
-                {
-                    _clipboardTradeProcessorProcessPressed = true;
-                    _readeProcessorPrevText = ImGui.GetClipboardText();
-                }
-                else if (!keyState && _clipboardTradeProcessorProcessPressed)
-                {
-                    _clipboardTradeProcessorProcessPressed = false;
-                    var tradeText = ImGui.GetClipboardText();
-
-                    if (_readeProcessorPrevText != tradeText)
-                    {
-                        WinApi.SetForegroundWindow(Process.GetCurrentProcess().MainWindowHandle);
-                        Thread.Sleep(30);
-                        _chatController.PrintToChat(tradeText);
-                    }
-
-                    _readeProcessorPrevText = null;
-                }
             }
+            DebugWindow.LogError($"[PoeTradesHelperCore] Chat scan thread stopped");
         }
 
         public override void OnPluginDestroyForHotReload()
         {
-            DebugWindow.LogMsg("****CANCELLATION ON DESTROY****");
+            if (Settings.Debug)
+            {
+                DebugWindow.LogMsg("[PoeTradesHelperCore] CANCELLATION ON DESTROY");
+            }
+                
             _cancellationTokenSource.Cancel();
             base.OnPluginDestroyForHotReload();
         }
 
         public override void OnClose()
         {
-            DebugWindow.LogMsg("****CANCELLATION ON CLOSE****");
+            if (Settings.Debug)
+            {
+                DebugWindow.LogMsg("[PoeTradesHelperCore] CANCELLATION ON CLOSE");
+            }
+                
             _cancellationTokenSource.Cancel();
             base.OnClose();
         }
@@ -217,7 +213,8 @@ namespace PoeTradesHelper
                         ImGuiWindowFlags.NoBackground |
                         ImGuiWindowFlags.NoBringToFrontOnFocus |
                         ImGuiWindowFlags.NoFocusOnAppearing |
-                        ImGuiWindowFlags.NoSavedSettings;
+                        ImGuiWindowFlags.NoSavedSettings |
+                        ImGuiWindowFlags.NoTitleBar;
 
             flags = Settings.Resizable ? flags : flags | ImGuiWindowFlags.NoResize;
             flags = Settings.Movable ? flags : flags | ImGuiWindowFlags.NoMove;
@@ -367,17 +364,17 @@ namespace PoeTradesHelper
                 if (DrawImageButton(buttonsRect, _inviteIcon))
                     _chatController.PrintToChat($"/invite {tradeEntry.PlayerNick}");
 
-                if (!Settings.HideBanButton)
-                {
-                    buttonsRect.X -= button_width + buttons_spacing + 10;
+                //if (!Settings.HideBanButton)
+                //{
+                //    buttonsRect.X -= button_width + buttons_spacing + 10;
 
-                    if (DrawImageButton(buttonsRect, _closeTexture, color: Color.Red))
-                    {
-                        _tradeLogic.TradeEntries.TryRemove(tradeEntry.UniqueId, out _);
+                //    if (DrawImageButton(buttonsRect, _closeTexture, color: Color.Red))
+                //    {
+                //        _tradeLogic.TradeEntries.TryRemove(tradeEntry.UniqueId, out _);
 
-                        _bannedMessagesFilter.BanMessage(tradeEntry.Message);
-                    }
-                }
+                //        _bannedMessagesFilter.BanMessage(tradeEntry.Message);
+                //    }
+                //}
                 
             }
 
@@ -507,14 +504,18 @@ namespace PoeTradesHelper
 
         private bool DrawButtonBase(RectangleF rect)
         {
-            var bgColor = Settings.ButtonBorder.Value;
+            var borderColor = Settings.ButtonBorder.Value;
             var contains = rect.Contains(Input.MousePosition);
             var wasIntended = rect.Contains(_mouseClickController.InitialMousePosition);
 
             if (contains)
-                bgColor = new Color(198, 193, 154);
+            {
+                //bgColor = new Color(255, 255, 255);
+                borderColor = new Color(198, 193, 154);
+            }
 
-            Graphics.DrawFrame(rect, bgColor, 1);
+            //Graphics.DrawBox(rect, Settings.ButtonBg);
+            Graphics.DrawFrame(rect, borderColor, 1);
 
             if (contains && _mouseClickController.MouseClick && wasIntended)
                 return true;

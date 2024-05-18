@@ -28,11 +28,11 @@ namespace PoeTradesHelper.Chat
         {
             var finalMessage = Regex.Replace(messageText, @"\[\d\d\:\d\d\]\s", string.Empty); //remove time
             finalMessage = Regex.Replace(finalMessage, @"<.+>\s", string.Empty); //remove nick tag
-            DebugWindow.LogMsg($"Received something: {messageText}");
+            //DebugWindow.LogMsg($"Received something: {messageText}");
             var match = _directMessageRegex.Match(finalMessage);
             if (match.Success)
             {
-                DebugWindow.LogMsg($"Received message: {finalMessage}");
+                //DebugWindow.LogMsg($"Received message: {finalMessage}");
                 var messageType = match.Groups["MsgDir"].Value == "To" ? MessageType.To : MessageType.From;
                 var target = match.Groups["Nick"].Value;
                 var messageValue = match.Groups["Message"].Value;
