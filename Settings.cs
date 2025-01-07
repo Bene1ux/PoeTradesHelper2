@@ -36,7 +36,7 @@ namespace PoeTradesHelper
         //public ToggleNode HideIfNoTradeEntries { get; set; } = new ToggleNode(true);
         //[Menu("Hide ban button")]
         //public ToggleNode HideBanButton { get; set; } = new ToggleNode(true);
-        public ToggleNode HighlightCell { get; set; } = new ToggleNode(true);
+        public ToggleNode HighlightCell { get; set; } = new ToggleNode(false);
         public RangeNode<int> HighlightX { get; set; } = new RangeNode<int>(1, 1, 24);
         public RangeNode<int> HighlightY { get; set; } = new RangeNode<int>(1, 1, 24);
         public ToggleNode Debug { get; set; } = new ToggleNode(false);

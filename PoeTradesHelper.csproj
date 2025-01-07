@@ -8,13 +8,13 @@
     <EmbedAllSources>true</EmbedAllSources>
     <PackageOutputPath />
   </PropertyGroup>
-<!--  <ItemGroup>
+  <ItemGroup>
     <None Remove="FastReplyButtons.txt" />
     <Content Include="FastReplyButtons.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
-  <ItemGroup>
+  <!--<ItemGroup>
     <Reference Include="ExileCore2">
       <HintPath>..\..\..\Desktop\Fg2\ExileCore2.dll</HintPath>
       <Private>False</Private>
