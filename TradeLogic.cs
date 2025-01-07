@@ -23,7 +23,7 @@ namespace PoeTradesHelper
             _settings = settings;
             _buyRegexEN = new Regex(
                 @"(I('d like| would like) to buy your|wtb) (?'ItemAmount'[\d.]+\s)?(?'ItemName'.*?) ((listed for|for my) (?'CurrencyAmount'[\d.]+) (?'CurrencyType'.*) )?in (?'LeagueName'\w+)?(?'ExtraText'.*)", RegexOptions.Compiled);
-            _buyRegexCompass = new Regex(@"WTB (?'ItemAmount'[\d.]*)\s(?'ItemName'.*?) (?>[\d.]+\.?[\d.]*)\w+ each\. Total (?'CurrencyAmount'\S+(?> \(.*\))?)?(?'ExtraText'.*)", RegexOptions.Compiled);
+            //_buyRegexCompass = new Regex(@"WTB (?'ItemAmount'[\d.]*)\s(?'ItemName'.*?) (?>[\d.]+\.?[\d.]*)\w+ each\. Total (?'CurrencyAmount'\S+(?> \(.*\))?)?(?'ExtraText'.*)", RegexOptions.Compiled);
             _buyRegexOther = new List<Regex>()
             {
                 new Regex(@"안녕하세요,", RegexOptions.Compiled),
@@ -34,6 +34,9 @@ namespace PoeTradesHelper
                 new Regex(@"Bonjour, je souhaiterais", RegexOptions.Compiled),
                 new Regex(@"Hola, quisiera", RegexOptions.Compiled),
                 new Regex(@"やあ、", RegexOptions.Compiled),
+                new Regex(@"你好",RegexOptions.Compiled),
+                new Regex(@"こんにちは",RegexOptions.Compiled),
+                
             };
 
 
@@ -58,12 +61,12 @@ namespace PoeTradesHelper
                     return;
                 }
 
-                var matchCompass = _buyRegexCompass.Match(message.Message);
+                /*var matchCompass = _buyRegexCompass.Match(message.Message);
                 if (matchCompass.Success)
                 {
                     TradeMessageReceivedCompass(message, matchCompass);
                     return;
-                }
+                }*/
 
                 foreach (var buyRegex in _buyRegexOther)
                 {
