@@ -24,8 +24,10 @@ namespace PoeTradesHelper
         //public ToggleNode PlaySound { get; set; } = new ToggleNode(true);
         public RangeNode<int> ChatScanDelay { get; set; } = new RangeNode<int>(1000, 10, 10000);
         //public RangeNode<int> BanMessageTimeMinutes { get; set; } = new RangeNode<int>(20, 1, 100);
-        [Menu("Minimum time between chat messages in milliseconds")]
+        [Menu("Delay between chat messages")]
         public RangeNode<int> MessageCooldownMilliseconds { get; set; } = new RangeNode<int>(200, 0, 1000);
+        [Menu("Delay between key presses")]
+        public RangeNode<int> KeyPressDelay { get; set; } = new RangeNode<int>(35, 0, 300);
         //[Menu("Restore Clipboard after sending a message")]
         //public ToggleNode RestoreClipboard { get; set; } = new ToggleNode(true);
         [Menu("Enable resize of trade window")]

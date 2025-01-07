@@ -14,7 +14,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
-  <!--<ItemGroup>
+  <ItemGroup>
     <Reference Include="ExileCore2">
       <HintPath>..\..\..\Desktop\Fg2\ExileCore2.dll</HintPath>
       <Private>False</Private>
@@ -27,8 +27,8 @@
       <HintPath>$(exileCore2Package)\ImGui.NET.dll</HintPath>
       <Private>False</Private>
     </Reference>
-  </ItemGroup>-->
-  <ItemGroup>
+  </ItemGroup>
+  <!--<ItemGroup>
     <Reference Include="ExileCore2">
       <HintPath>$(exileCore2Package)\ExileCore2.dll</HintPath>
       <Private>False</Private>
@@ -40,7 +40,7 @@
       <HintPath>$(exileCore2Package)\ImGui.NET.dll</HintPath>
       <Private>False</Private>
     </Reference>
-  </ItemGroup>
+  </ItemGroup>-->
   <ItemGroup>
     <Content Include="Sounds\notification.wav">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

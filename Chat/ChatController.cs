@@ -134,17 +134,20 @@ namespace PoeTradesHelper.Chat
             if (!chatBoxRoot.IsVisible)
             {
                 SendKeys.SendWait("{ENTER}");
+                //Thread.Sleep(_settings.KeyPressDelay.Value);
                // Input.KeyPressRelease(Keys.Enter);
                 /*simulator.Keyboard.KeyDown(VirtualKeyCode.RETURN);
                 simulator.Keyboard.KeyUp(VirtualKeyCode.RETURN);*/
             }
 
-            var oldClipboardText = Clipboard.GetText();//ImGui.GetClipboardText();
+            //var oldClipboardText = Clipboard.GetText();//ImGui.GetClipboardText();
             if (!string.IsNullOrEmpty(message))
             {
                 ImGui.SetClipboardText(message);
             }
+            Thread.Sleep(_settings.KeyPressDelay.Value);
             SendKeys.SendWait("^v");
+            //Thread.Sleep(_settings.KeyPressDelay.Value);
             if (send)
             {
                 SendKeys.SendWait("{ENTER}");
@@ -158,7 +161,7 @@ namespace PoeTradesHelper.Chat
                 simulator.Keyboard.KeyUp(VirtualKeyCode.RETURN);
             }*/
 
-            Thread.Sleep(_settings.MessageCooldownMilliseconds);
+            Thread.Sleep(_settings.MessageCooldownMilliseconds.Value);
             /*if (_settings.RestoreClipboard)
             {
                 ImGui.SetClipboardText(oldClipboardText);
