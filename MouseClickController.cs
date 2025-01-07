@@ -1,6 +1,5 @@
 ﻿using System.Windows.Forms;
-using ExileCore;
-using SharpDX;
+using ExileCore2;
 
 namespace PoeTradesHelper
 {
@@ -9,7 +8,7 @@ namespace PoeTradesHelper
         private bool _mouseDown;
         public bool MouseClick { get; private set; }
 
-        public Vector2 InitialMousePosition { get; private set; }
+        public System.Numerics.Vector2 InitialMousePosition { get; private set; }
 
         public MouseClickController()
         {

@@ -5,31 +5,40 @@
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <UseWindowsForms>true</UseWindowsForms>
     <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
+    <EmbedAllSources>true</EmbedAllSources>
     <PackageOutputPath />
   </PropertyGroup>
+<!--  <ItemGroup>
+    <None Remove="FastReplyButtons.txt" />
+    <Content Include="FastReplyButtons.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
   <ItemGroup>
-    <Reference Include="ExileCore">
-      <HintPath>..\PoEHelper-3.20.0-2\ExileCore.dll</HintPath>
+    <Reference Include="ExileCore2">
+      <HintPath>..\..\..\Desktop\Fg2\ExileCore2.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="GameOffsets2">
+      <HintPath>..\..\..\Desktop\Fg2\GameOffsets2.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="ImGui.NET">
-      <HintPath>..\PoEHelper-3.20.0-2\ImGui.NET.dll</HintPath>
+      <HintPath>$(exileCore2Package)\ImGui.NET.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="SharpDX">
-      <HintPath>..\PoEHelper-3.20.0-2\SharpDX.dll</HintPath>
+  </ItemGroup>-->
+  <ItemGroup>
+    <Reference Include="ExileCore2">
+      <HintPath>$(exileCore2Package)\ExileCore2.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="SharpDX.Desktop">
-      <HintPath>..\..\..\..\PoEHelper\SharpDX.Desktop.dll</HintPath>
-      <Private>False</Private>
+    <Reference Include="GameOffsets2">
+      <HintPath>$(exileCore2Package)\GameOffsets2.dll</HintPath>
     </Reference>
-    <Reference Include="SharpDX.Mathematics">
-      <HintPath>..\PoEHelper-3.20.0-2\SharpDX.Mathematics.dll</HintPath>
+    <Reference Include="ImGui.NET">
+      <HintPath>$(exileCore2Package)\ImGui.NET.dll</HintPath>
       <Private>False</Private>
-    </Reference>
-    <Reference Include="WindowsInput">
-      <HintPath>lib\WindowsInput.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -46,13 +55,8 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="lib\" />
-  </ItemGroup>
-  <ItemGroup>
     <PackageReference Include="ImGui.NET" Version="1.86.0" />
     <PackageReference Include="Serilog" Version="2.10.0" />
-    <PackageReference Include="SharpDX" Version="4.2.0" />
-    <PackageReference Include="SharpDX.Mathematics" Version="4.2.0" />
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
     <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="6.0.0" />
   </ItemGroup>

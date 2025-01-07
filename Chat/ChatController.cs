@@ -4,13 +4,12 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Windows.Forms;
-using ExileCore;
-using ExileCore.PoEMemory.Elements;
-using ExileCore.PoEMemory.MemoryObjects;
-using ExileCore.Shared;
+using ExileCore2;
+using ExileCore2.PoEMemory.Elements;
+using ExileCore2.PoEMemory.MemoryObjects;
+using ExileCore2.Shared;
 using ImGuiNET;
-using WindowsInput;
-using WindowsInput.Native;
+
 
 namespace PoeTradesHelper.Chat
 {
@@ -38,10 +37,10 @@ namespace PoeTradesHelper.Chat
         {
             if (_updateSw.ElapsedMilliseconds > _settings.ChatScanDelay.Value)
             {
-                if (_settings.Debug)
+                /*if (_settings.Debug)
                 {
                     DebugWindow.LogMsg($"[PoeTradesHelper] Scanning chat");
-                }
+                }*/
                 _updateSw.Restart();
                 ScanChat();
             }
@@ -57,8 +56,8 @@ namespace PoeTradesHelper.Chat
             //    DebugWindow.LogMsg("No chat msg thingy");
             //}
 
-            //var messageElements = _gameController?.Game?.IngameState?.IngameUi?.ChatMessages?.ToList();
-            var messageElements = _gameController?.Game?.IngameState?.IngameUi?.ChatPanel?.Children[1]?.Children[2]?.Children[1]?.Children.ToList();
+            var messageElements = _gameController?.Game?.IngameState?.IngameUi?.ChatMessages?.ToList();
+            //var messageElements = _gameController?.Game?.IngameState?.IngameUi?.ChatPanel?.Children[1]?.Children[2]?.Children[1]?.Children.ToList();
 
             if (messageElements == null)
             {
@@ -74,7 +73,7 @@ namespace PoeTradesHelper.Chat
             for (var i = messageElements.Count - 1; i >= 0; i--)
             {
                 //var messageElement = messageElements[i];
-                var messageElement = messageElements[i].Text;
+                var messageElement = messageElements[i];//.Text;
 
                 if (messageElement.Equals(_lastMessageAddress))
                     break;
@@ -97,7 +96,7 @@ namespace PoeTradesHelper.Chat
             }
 
             //_lastMessageAddress = messageElements.LastOrDefault();
-            _lastMessageAddress = messageElements.LastOrDefault()?.Text;
+            _lastMessageAddress = messageElements.LastOrDefault();//?.Text;
 
             if (firstScan)
             {
@@ -131,11 +130,13 @@ namespace PoeTradesHelper.Chat
             }
 
             var chatBoxRoot = _gameController.Game.IngameState.IngameUi.ChatTitlePanel;
-            var simulator = new InputSimulator();
+           //var simulator = new InputSimulator();
             if (!chatBoxRoot.IsVisible)
             {
-                simulator.Keyboard.KeyDown(VirtualKeyCode.RETURN);
-                simulator.Keyboard.KeyUp(VirtualKeyCode.RETURN);
+                SendKeys.SendWait("{ENTER}");
+               // Input.KeyPressRelease(Keys.Enter);
+                /*simulator.Keyboard.KeyDown(VirtualKeyCode.RETURN);
+                simulator.Keyboard.KeyUp(VirtualKeyCode.RETURN);*/
             }
 
             var oldClipboardText = Clipboard.GetText();//ImGui.GetClipboardText();
@@ -143,21 +144,25 @@ namespace PoeTradesHelper.Chat
             {
                 ImGui.SetClipboardText(message);
             }
-            simulator.Keyboard.ModifiedKeyStroke(VirtualKeyCode.CONTROL, VirtualKeyCode.VK_V);
+            SendKeys.SendWait("^v");
+            if (send)
+            {
+                SendKeys.SendWait("{ENTER}");
+                //Input.KeyPressRelease(Keys.Enter);
+            }
+           
+            /*simulator.Keyboard.ModifiedKeyStroke(VirtualKeyCode.CONTROL, VirtualKeyCode.VK_V);
             if (send)
             {
                 simulator.Keyboard.KeyDown(VirtualKeyCode.RETURN);
                 simulator.Keyboard.KeyUp(VirtualKeyCode.RETURN);
-            }
+            }*/
 
             Thread.Sleep(_settings.MessageCooldownMilliseconds);
-            if (_settings.RestoreClipboard)
+            /*if (_settings.RestoreClipboard)
             {
                 ImGui.SetClipboardText(oldClipboardText);
-            }
-
-            //WinApi.SetForegroundWindow(Process.GetCurrentProcess().MainWindowHandle);
-            //WinApi.SetForegroundWindow(_gameController.Window.Process.MainWindowHandle);
+            }*/
         }
     }
 }

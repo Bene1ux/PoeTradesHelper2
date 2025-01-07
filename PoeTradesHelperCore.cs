@@ -1,23 +1,22 @@
 ﻿using System;
+using System.Drawing;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using ExileCore;
-using ExileCore.PoEMemory.Components;
-using ExileCore.Shared.AtlasHelper;
-using ExileCore.Shared.Enums;
-using ExileCore.Shared.Helpers;
+using ExileCore2;
+using ExileCore2.PoEMemory.Components;
+using ExileCore2.Shared.AtlasHelper;
+using ExileCore2.Shared.Enums;
+using ExileCore2.Shared.Helpers;
 using ImGuiNET;
 using PoeTradesHelper.Chat;
-using SharpDX;
 
 namespace PoeTradesHelper
 {
-    using System.Diagnostics;
-    using System.Linq;
-    using ExileCore.PoEMemory.MemoryObjects;
-    using ExileCore.Shared;
+    using System.Media;
+    using ExileCore2.PoEMemory.MemoryObjects;
+    using ExileCore2.Shared;
 
     public class PoeTradesHelperCore : BaseSettingsPlugin<Settings>
     {
@@ -54,6 +53,7 @@ namespace PoeTradesHelper
         public override bool Initialise()
         {
             Input.RegisterKey(Keys.Control);
+            Input.RegisterKey(Keys.LControlKey);
             Input.RegisterKey(Keys.Enter);
             Input.RegisterKey(Keys.V);
             _chatController = new ChatController(GameController, Settings);
@@ -86,15 +86,15 @@ namespace PoeTradesHelper
             _tradeLogic.NewTradeReceived += OnNewTradeReceived;
 
             _cancellationTokenSource = new CancellationTokenSource();
-            if (Settings.Debug)
+            /*if (Settings.Debug)
             {
                 DebugWindow.LogMsg("[PoeTradesHelperCore] NEW CANCELLATION");
-            }
-                
+            }*/
+
             var factory = new TaskFactory(_cancellationTokenSource.Token,
-                                          TaskCreationOptions.LongRunning,
-                                          TaskContinuationOptions.None,
-                                          TaskScheduler.Default);
+                TaskCreationOptions.LongRunning,
+                TaskContinuationOptions.None,
+                TaskScheduler.Default);
             factory.StartNew(UpdateThread, _cancellationTokenSource.Token);
 
             return base.Initialise();
@@ -105,11 +105,11 @@ namespace PoeTradesHelper
         public override void OnUnload()
         {
             base.OnUnload();
-            if (Settings.Debug)
+            /*if (Settings.Debug)
             {
                 DebugWindow.LogMsg("[PoeTradesHelperCore] CANCELLATION ON UNLOAD");
-            }
-            
+            }*/
+
             _cancellationTokenSource.Cancel();
         }
 
@@ -126,6 +126,7 @@ namespace PoeTradesHelper
 
             if (string.IsNullOrEmpty(playerName))
                 return;
+
             _areaPlayersController.RegisterPlayerInArea(playerName);
         }
 
@@ -149,8 +150,14 @@ namespace PoeTradesHelper
 
         private void OnNewTradeReceived()
         {
-            if (Settings.PlaySound.Value)
-                GameController.SoundController.PlaySound(_notificationSound);
+            using (var soundPlayer = new SoundPlayer(_notificationSound))
+            {
+                soundPlayer.Play();
+            }
+
+            //if (Settings.PlaySound.Value)
+            //   GameController.SoundController.PlaySound(_notificationSound);
+            LogMessage($"Sound was played?");
         }
 
         private void UpdateThread()
@@ -160,27 +167,28 @@ namespace PoeTradesHelper
                 _chatController.Update();
                 Task.Delay(100).Wait();
             }
+
             DebugWindow.LogError($"[PoeTradesHelperCore] Chat scan thread stopped");
         }
 
         public override void OnPluginDestroyForHotReload()
         {
-            if (Settings.Debug)
+            /*if (Settings.Debug)
             {
                 DebugWindow.LogMsg("[PoeTradesHelperCore] CANCELLATION ON DESTROY");
-            }
-                
+            }*/
+
             _cancellationTokenSource.Cancel();
             base.OnPluginDestroyForHotReload();
         }
 
         public override void OnClose()
         {
-            if (Settings.Debug)
+            /*if (Settings.Debug)
             {
                 DebugWindow.LogMsg("[PoeTradesHelperCore] CANCELLATION ON CLOSE");
-            }
-                
+            }*/
+
             _cancellationTokenSource.Cancel();
             base.OnClose();
         }
@@ -189,19 +197,19 @@ namespace PoeTradesHelper
         {
             if (Settings.HighlightCell)
             {
-                _stashTradeController.HighlightCell(Settings.HighlightX,Settings.HighlightY,Settings.IsQuad);
+                _stashTradeController.HighlightCell(Settings.HighlightX.Value, Settings.HighlightY.Value);
             }
 
-            if (_tradeLogic.TradeEntries.Count == 0 && Settings.HideIfNoTradeEntries)
-                return;
+            /*if (_tradeLogic.TradeEntries.Count == 0 && Settings.HideIfNoTradeEntries)
+                return;*/
 
             _mouseClickController.Update();
 
             ImGui.SetNextWindowPos(new System.Numerics.Vector2(Settings.PosX, Settings.PosY), ImGuiCond.Once,
-                                   System.Numerics.Vector2.Zero);
+                System.Numerics.Vector2.Zero);
 
             var windowSize = new System.Numerics.Vector2(Settings.EntryWidth,
-                                                         _tradeLogic.TradeEntries.Count * (ENTRY_HEIGHT + EntrySpacing) + 20);
+                _tradeLogic.TradeEntries.Count * (ENTRY_HEIGHT + EntrySpacing) + 20);
 
             ImGui.SetNextWindowSize(
                 windowSize,
@@ -219,8 +227,8 @@ namespace PoeTradesHelper
             flags = Settings.Resizable ? flags : flags | ImGuiWindowFlags.NoResize;
             flags = Settings.Movable ? flags : flags | ImGuiWindowFlags.NoMove;
 
-            if (!rect.Contains(Input.MousePosition))
-                flags ^= ImGuiWindowFlags.NoMove;
+            /*if (!rect.Contains(Input.MousePosition))
+                flags ^= ImGuiWindowFlags.NoMove;*/
 
             var opened = true;
 
@@ -237,7 +245,6 @@ namespace PoeTradesHelper
             }
 
             ImGui.End();
-
         }
 
         private void DrawWindowContent()
@@ -268,10 +275,10 @@ namespace PoeTradesHelper
                     contentRect.Top += 25;
                     DrawContent(tradeEntry.Value, contentRect);
                 }
-               
-                
+
+
                 Graphics.DrawFrame(rect, Settings.TradeEntryBorder.Value, 1);
-                 drawPos.Y += height + EntrySpacing;
+                drawPos.Y += height + EntrySpacing;
             }
 
             _stashTradeController.Draw(_tradeLogic.TradeEntries.Values);
@@ -285,7 +292,7 @@ namespace PoeTradesHelper
             var minimizePos = headerRect.TopLeft.Translate(3);
 
             if (DrawTextButton(ref minimizePos, 18, tradeEntry.Minimize ? ">" : "v", 2,
-                    tradeEntry.Minimize ? new Color(255, 211, 78) : Color.Green))
+                    tradeEntry.Minimize ? Color.FromArgb(255, 211, 78) : Color.Green))
             {
                 tradeEntry.Minimize = !tradeEntry.Minimize;
             }
@@ -296,7 +303,7 @@ namespace PoeTradesHelper
             }
 
             var inArea = _areaPlayersController.IsPlayerInArea(tradeEntry.PlayerNick);
-            var nickPos = new Vector2(headerRect.X + 15 + 20 + 3, headerRect.Y + 1);
+            var nickPos = new System.Numerics.Vector2(headerRect.X + 15 + 20 + 3, headerRect.Y + 1);
 
             var nickShort = tradeEntry.PlayerNick;
 
@@ -305,16 +312,18 @@ namespace PoeTradesHelper
                 nickShort = $"{nickShort.Substring(0, 6)}...";
             }
 
-            if (DrawTextButton(ref nickPos, 18, nickShort, 0, inArea ? Color.Green : new Color(255, 211, 78)))
+            if (DrawTextButton(ref nickPos, 18, nickShort, 0, inArea ? Color.Green : Color.FromArgb(255, 211, 78)))
                 _chatController.PrintToChat($"@{tradeEntry.PlayerNick} ", false);
 
-            var currencyTextPos = nickPos.Translate(19);//headerRect.TopLeft.Translate(135+Graphics.MeasureText(nickShort).X);//headerRect.TopLeft.Translate(headerRect.Width / 2 - 5);
+            var currencyTextPos =
+                nickPos.Translate(
+                    19); //headerRect.TopLeft.Translate(135+Graphics.MeasureText(nickShort).X);//headerRect.TopLeft.Translate(headerRect.Width / 2 - 5);
 
             var textSize = Graphics.DrawText($"{tradeEntry.CurrencyAmount} {tradeEntry.CurrencyType}",
-                                             currencyTextPos,
-                                             Settings.CurrencyColor.Value, FontAlign.Left);
+                currencyTextPos,
+                Settings.CurrencyColor.Value, FontAlign.Left);
 
-            var rectangleF = new RectangleF(nickPos.X-2, currencyTextPos.Y, 18, 18);
+            var rectangleF = new RectangleF(nickPos.X - 2, currencyTextPos.Y, 18, 18);
             Graphics.DrawImage(tradeEntry.IsIncomingTrade ? _outgoingTradeIcon : _incomeTradeIcon, rectangleF);
 
             const float button_width = 18;
@@ -375,7 +384,6 @@ namespace PoeTradesHelper
                 //        _bannedMessagesFilter.BanMessage(tradeEntry.Message);
                 //    }
                 //}
-                
             }
 
             var elapsed = DateTime.Now - tradeEntry.Timestamp;
@@ -394,8 +402,9 @@ namespace PoeTradesHelper
                 nameText = tradeEntry.ItemAmount + " " + tradeEntry.ItemName;
             }
 
-            Graphics.DrawText(nameText, contentRect.TopLeft.Translate(30, 2), Color.Yellow);
-            Graphics.DrawText(tradeEntry.OfferText, contentRect.TopLeft.Translate(contentRect.Width - 30, 2), Color.Red, FontAlign.Right);
+            Graphics.DrawText(nameText, contentRect.TopLeft.Translate(30, 2), System.Drawing.Color.Yellow);
+            Graphics.DrawText(tradeEntry.OfferText, contentRect.TopLeft.Translate(contentRect.Width - 30, 2),
+                System.Drawing.Color.Red, FontAlign.Right);
 
             var repeatButtonRect = contentRect;
             repeatButtonRect.Y += 2;
@@ -409,11 +418,13 @@ namespace PoeTradesHelper
                 {
                     if (string.IsNullOrEmpty(tradeEntry.CurrencyType))
                     {
-                        _chatController.PrintToChat($"@{tradeEntry.PlayerNick} Hi, are you still interested in my {tradeEntry.ItemName}?");
+                        _chatController.PrintToChat(
+                            $"@{tradeEntry.PlayerNick} Hi, are you still interested in my {tradeEntry.ItemName}?");
                     }
                     else
                     {
-                        _chatController.PrintToChat($"@{tradeEntry.PlayerNick} Hi, are you still interested in my {tradeEntry.ItemName} for {tradeEntry.CurrencyAmount} {tradeEntry.CurrencyType}?");
+                        _chatController.PrintToChat(
+                            $"@{tradeEntry.PlayerNick} Hi, are you still interested in my {tradeEntry.ItemName} for {tradeEntry.CurrencyAmount} {tradeEntry.CurrencyType}?");
                     }
                 }
             }
@@ -452,7 +463,8 @@ namespace PoeTradesHelper
                         if (tradeEntry.IsIncomingTrade)
                             _chatController.PrintToChat($"/kick {tradeEntry.PlayerNick}");
                         else
-                            _chatController.PrintToChat($"/kick {GameController.Player.GetComponent<Player>().PlayerName}");
+                            _chatController.PrintToChat(
+                                $"/kick {GameController.Player.GetComponent<Player>().PlayerName}");
                     }
                     else if (replyButtonInfo.Close)
                     {
@@ -480,13 +492,13 @@ namespace PoeTradesHelper
                 rect.Height -= imageMargin * 2;
             }
 
-            Graphics.DrawImage(texture, rect, color ?? Color.White);
+            Graphics.DrawImage(texture, rect, System.Drawing.Color.White);
 
             return result;
         }
 
         private bool DrawTextButton(
-            ref Vector2 pos,
+            ref System.Numerics.Vector2 pos,
             float height,
             string text,
             float sideMargin = 5,
@@ -496,8 +508,11 @@ namespace PoeTradesHelper
 
             var rect = new RectangleF(pos.X, pos.Y, textSize.X + sideMargin * 2, height);
             pos.X += textSize.X + sideMargin * 2 + 5;
+            var c = color == null
+                ? System.Drawing.Color.White
+                : System.Drawing.Color.FromArgb(color.Value.R, color.Value.G, color.Value.B);
 
-            Graphics.DrawText(text, rect.Center, color ?? Color.White, FontAlign.Center | FontAlign.VerticalCenter);
+            Graphics.DrawText(text, rect.Center, c, FontAlign.Center | FontAlign.VerticalCenter);
 
             return DrawButtonBase(rect);
         }
@@ -511,7 +526,7 @@ namespace PoeTradesHelper
             if (contains)
             {
                 //bgColor = new Color(255, 255, 255);
-                borderColor = new Color(198, 193, 154);
+                borderColor = System.Drawing.Color.Gray;
             }
 
             //Graphics.DrawBox(rect, Settings.ButtonBg);

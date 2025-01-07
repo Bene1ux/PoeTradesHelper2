@@ -1,18 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using ExileCore;
-using ExileCore.PoEMemory.Components;
-using ExileCore.PoEMemory.MemoryObjects;
-using ExileCore.Shared.Enums;
-using SharpDX;
+using ExileCore2;
+using ExileCore2.PoEMemory.Components;
+using ExileCore2.PoEMemory.MemoryObjects;
+using ExileCore2.Shared.Enums;
 using StashItemsDict = System.Collections.Generic.Dictionary<string, System.Collections.Generic.List<int>>;
+using System.Linq;
+using ExileCore2.Shared;
 
 namespace PoeTradesHelper
 {
-    using System.Diagnostics;
-    using System.Linq;
-    using ExileCore.PoEMemory.Elements.InventoryElements;
-
     public class StashTradeController
     {
         private readonly GameController _gameController;
@@ -32,7 +29,7 @@ namespace PoeTradesHelper
             //UpdateStashTradeItems();
         }
 
-        public void HighlightCell(int x, int y, bool isQuad)
+        public void HighlightCell(int x, int y)
         {
             var stashElement = _gameController.Game.IngameState.IngameUi.StashElement;
 
@@ -40,28 +37,28 @@ namespace PoeTradesHelper
                 return;
 
             var visibleStash = stashElement.VisibleStash;
-            if (visibleStash != null)
+            if (visibleStash == null)
             {
-                var items = stashElement.VisibleStash?.VisibleInventoryItems;
-                if (items != null)
-                {
-                    isQuad = isQuad || items.Any(i => i.InventPosX > 12 || i.InventPosY > 12);
-                }
-
-                var cellCount = isQuad ? 24 : 12;
-                var visibleStashRect = visibleStash.GetClientRectCache;
-                var cellSize = visibleStashRect.Width / cellCount;
-
-                var itemRect = new RectangleF(
-                    visibleStashRect.X + (x - 1) * cellSize,
-                    visibleStashRect.Y + (y - 1) * cellSize,
-                    cellSize,
-                    cellSize);
-
-                _graphics.DrawFrame(itemRect, Color.Azure, 3);
+                return;
             }
+
+            var cellCount = stashElement.VisibleStash.InventorySize.X;
+            if (cellCount == 0)
+            {
+                return;
+            }
+
+            var visibleStashRect = visibleStash.GetClientRectCache;
+            var cellSize = visibleStashRect.Width / cellCount;
+
+            var itemRect = new RectangleF(
+                visibleStashRect.X + (x - 1) * cellSize,
+                visibleStashRect.Y + (y - 1) * cellSize,
+                cellSize,
+                cellSize);
+            _graphics.DrawFrame(itemRect, System.Drawing.Color.Azure, 3);
         }
-        
+
         private void HighlightTradeItems(ICollection<TradeEntry> entries)
         {
             var stashElement = _gameController.Game.IngameState.IngameUi.StashElement;
@@ -80,7 +77,7 @@ namespace PoeTradesHelper
                 if (!tradeEntry.IsIncomingTrade)
                     continue;
 
-                if (tradeEntry.ItemPosInfo == null)//try draw without pos
+                if (tradeEntry.ItemPosInfo == null) //try draw without pos
                 {
                     var items = stashElement.VisibleStash?.VisibleInventoryItems;
 
@@ -90,10 +87,10 @@ namespace PoeTradesHelper
 
                         foreach (var item in tradeItems)
                         {
-                            _graphics.DrawFrame(item.GetClientRect(), Color.Magenta, 2);
+                            _graphics.DrawFrame(item.GetClientRect(), System.Drawing.Color.Magenta, 2);
                         }
                     }
-                    
+
                     continue;
                 }
 
@@ -109,7 +106,7 @@ namespace PoeTradesHelper
                         {
                             var rect = childAtIndex.GetClientRect();
                             rect.Y += yShift * viewAllStashPanel.Scale;
-                            _graphics.DrawFrame(rect, Color.Yellow, 2);
+                            _graphics.DrawFrame(rect, System.Drawing.Color.Yellow, 2);
                         }
                         else
                         {
@@ -117,13 +114,13 @@ namespace PoeTradesHelper
                         }
                     }
                 }
-                else if(visibleStash != null)
+                else if (visibleStash != null)
                 {
                     var items = stashElement.VisibleStash?.VisibleInventoryItems;
                     var isQuad = false;
                     if (items != null)
                     {
-                        isQuad = items.Any(i => i.InventPosX > 12 || i.InventPosY > 12);
+                        isQuad = false; //items.Any(i => i.InventPosX > 12 || i.InventPosY > 12);
                     }
 
                     var cellCount = isQuad ? 24 : visibleStash.InvType == InventoryType.QuadStash ? 24 : 12;
@@ -135,8 +132,8 @@ namespace PoeTradesHelper
                         visibleStashRect.Y + (tradeEntry.ItemPosInfo.Pos.Y - 1) * cellSize,
                         cellSize,
                         cellSize);
-
-                    _graphics.DrawFrame(itemRect, Color.Yellow, 3);
+                    var f = new ExileCore2.Shared.RectangleF(itemRect.X, itemRect.Y, itemRect.Width, itemRect.Height);
+                    _graphics.DrawFrame(f, System.Drawing.Color.Yellow, 3);
                 }
             }
         }

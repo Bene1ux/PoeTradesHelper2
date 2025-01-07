@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using ExileCore2;
 using PoeTradesHelper.Chat;
 
 namespace PoeTradesHelper
@@ -16,7 +17,11 @@ namespace PoeTradesHelper
             else if (message.MessageType == MessageType.JoinArea)
             {
                 if (!_playersInArea.Contains(message.Nick))
-                    _playersInArea.Add(message.Nick);
+                {
+                     _playersInArea.Add(message.Nick);
+                     //DebugWindow.LogMsg($"Player {message.Nick} in area.");
+                }
+                   
             }
         }
 
@@ -28,7 +33,11 @@ namespace PoeTradesHelper
         public void RegisterPlayerInArea(string nick)
         {
             if (!_playersInArea.Contains(nick))
+            {
                 _playersInArea.Add(nick);
+                //DebugWindow.LogMsg($"Player {nick} in area");
+            }
+                
         }
 
         public void UnregisterPlayerInArea(string nick)

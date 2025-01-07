@@ -2,7 +2,7 @@
 using System.Diagnostics;
 using System.IO;
 using System.Text.RegularExpressions;
-using ExileCore;
+using ExileCore2;
 
 namespace PoeTradesHelper.Chat
 {
