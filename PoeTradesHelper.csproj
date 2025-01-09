@@ -14,7 +14,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
-  <!--<ItemGroup>
+<!--  <ItemGroup>
     <Reference Include="ExileCore2">
       <HintPath>..\..\..\Desktop\Fg2\ExileCore2.dll</HintPath>
       <Private>False</Private>
@@ -26,6 +26,9 @@
     <Reference Include="ImGui.NET">
       <HintPath>$(exileCore2Package)\ImGui.NET.dll</HintPath>
       <Private>False</Private>
+    </Reference>
+    <Reference Include="WindowsInput">
+      <HintPath>lib\WindowsInput.dll</HintPath>
     </Reference>
   </ItemGroup>-->
   <ItemGroup>
@@ -39,6 +42,9 @@
     <Reference Include="ImGui.NET">
       <HintPath>$(exileCore2Package)\ImGui.NET.dll</HintPath>
       <Private>False</Private>
+    </Reference>
+    <Reference Include="WindowsInput">
+      <HintPath>lib\WindowsInput.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

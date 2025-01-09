@@ -237,11 +237,11 @@ namespace PoeTradesHelper
                 DrawWindowContent();
 
                 var pos = ImGui.GetWindowPos();
-                Settings.PosX = pos.X;
-                Settings.PosY = pos.Y;
+                Settings.PosX.Value = pos.X;
+                Settings.PosY.Value = pos.Y;
 
                 var size = ImGui.GetWindowSize();
-                Settings.EntryWidth = size.X;
+                Settings.EntryWidth.Value = size.X;
             }
 
             ImGui.End();

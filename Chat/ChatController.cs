@@ -9,6 +9,8 @@ using ExileCore2.PoEMemory.Elements;
 using ExileCore2.PoEMemory.MemoryObjects;
 using ExileCore2.Shared;
 using ImGuiNET;
+using WindowsInput;
+using WindowsInput.Native;
 
 
 namespace PoeTradesHelper.Chat
@@ -130,36 +132,25 @@ namespace PoeTradesHelper.Chat
             }
 
             var chatBoxRoot = _gameController.Game.IngameState.IngameUi.ChatTitlePanel;
-           //var simulator = new InputSimulator();
-            if (!chatBoxRoot.IsVisible)
-            {
-                SendKeys.SendWait("{ENTER}");
-                //Thread.Sleep(_settings.KeyPressDelay.Value);
-               // Input.KeyPressRelease(Keys.Enter);
-                /*simulator.Keyboard.KeyDown(VirtualKeyCode.RETURN);
-                simulator.Keyboard.KeyUp(VirtualKeyCode.RETURN);*/
-            }
+           var simulator = new InputSimulator();
+           if (!chatBoxRoot.IsVisible)
+           {
+               simulator.Keyboard.KeyDown(VirtualKeyCode.RETURN);
+               simulator.Keyboard.KeyUp(VirtualKeyCode.RETURN);
+           }
 
             //var oldClipboardText = Clipboard.GetText();//ImGui.GetClipboardText();
             if (!string.IsNullOrEmpty(message))
             {
                 ImGui.SetClipboardText(message);
             }
-            Thread.Sleep(_settings.KeyPressDelay.Value);
-            SendKeys.SendWait("^v");
-            //Thread.Sleep(_settings.KeyPressDelay.Value);
-            if (send)
-            {
-                SendKeys.SendWait("{ENTER}");
-                //Input.KeyPressRelease(Keys.Enter);
-            }
            
-            /*simulator.Keyboard.ModifiedKeyStroke(VirtualKeyCode.CONTROL, VirtualKeyCode.VK_V);
+            simulator.Keyboard.ModifiedKeyStroke(VirtualKeyCode.CONTROL, VirtualKeyCode.VK_V);
             if (send)
             {
                 simulator.Keyboard.KeyDown(VirtualKeyCode.RETURN);
                 simulator.Keyboard.KeyUp(VirtualKeyCode.RETURN);
-            }*/
+            }
 
             Thread.Sleep(_settings.MessageCooldownMilliseconds.Value);
             /*if (_settings.RestoreClipboard)
