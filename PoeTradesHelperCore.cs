@@ -203,6 +203,12 @@ namespace PoeTradesHelper
             /*if (_tradeLogic.TradeEntries.Count == 0 && Settings.HideIfNoTradeEntries)
                 return;*/
 
+            if (_tradeLogic.TradeEntries.IsEmpty)
+            {
+                return;
+            }
+                
+
             _mouseClickController.Update();
 
             ImGui.SetNextWindowPos(new System.Numerics.Vector2(Settings.PosX, Settings.PosY), ImGuiCond.Once,
@@ -214,8 +220,6 @@ namespace PoeTradesHelper
             ImGui.SetNextWindowSize(
                 windowSize,
                 ImGuiCond.Always);
-
-            var rect = new RectangleF(Settings.PosX, Settings.PosY, windowSize.X, 60);
 
             var flags = ImGuiWindowFlags.NoScrollbar |
                         ImGuiWindowFlags.NoBackground |
@@ -448,7 +452,8 @@ namespace PoeTradesHelper
             {
                 if (DrawTextButton(ref buttonsDrawPos, 19, replyButtonInfo.ButtonName))
                 {
-                    _chatController.PrintToChat($"@{tradeEntry.PlayerNick} {replyButtonInfo.Message}");
+                    var message = replyButtonInfo.Message.Replace("{player}", tradeEntry.PlayerNick);
+                    _chatController.PrintToChat($"@{tradeEntry.PlayerNick} {message}");
 
                     if (replyButtonInfo.GoToOwnHideout)
                     {
