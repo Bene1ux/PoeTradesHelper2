@@ -14,7 +14,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
-<!--  <ItemGroup>
+  <!--<ItemGroup>
     <Reference Include="ExileCore2">
       <HintPath>..\..\..\Desktop\Fg2\ExileCore2.dll</HintPath>
       <Private>False</Private>
@@ -38,6 +38,7 @@
     </Reference>
     <Reference Include="GameOffsets2">
       <HintPath>$(exileCore2Package)\GameOffsets2.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="ImGui.NET">
       <HintPath>$(exileCore2Package)\ImGui.NET.dll</HintPath>
